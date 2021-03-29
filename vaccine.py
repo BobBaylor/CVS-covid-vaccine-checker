@@ -33,6 +33,7 @@ def find_a_vaccine(opts, city_lst):
             if found, display the CVS city and make a sound
             else, print a '.' (period)
     """
+    city_str_len = max([len(x) for x in city_lst])
     hours_to_run = int(opts['--time']) # command line argument
     max_time = time.time() + hours_to_run*60*60
     while time.time() < max_time:
@@ -49,13 +50,17 @@ def find_a_vaccine(opts, city_lst):
             mappings[item.get('city')] = item.get('status')
 
         got_lst = []
+        ct_str = time.ctime()
         for key in mappings:
             if (key in city_lst) and (mappings[key] != 'Fully Booked'):
-                got_lst += [f'{key:30s} - {mappings[key]}']
+                got_lst += [f'{ct_str} - {key:{city_str_len}s} - {mappings[key]}']
         if got_lst:
-            print('\n', time.ctime(), 'success!')
             print('\n'.join(got_lst))
-            beep(sound='success')
+            with open(opts['--file'], 'a') as f_out:
+                f_out.write('\n'.join(got_lst))
+                f_out.write('\n')
+            if not opts['--silent']:
+                beep(sound='success')
         else:
             print('.', end='', flush=True)
         time.sleep(int(opts['--period'])) # command line argument
@@ -64,14 +69,16 @@ def find_a_vaccine(opts, city_lst):
 
 USAGE_STR = """
 Usage:
-  vaccine  [--bay] [--debug=<D>] [--period=<P>] [--time=<T>] [--help]
+  vaccine  [--bay] [--debug=<D>] [--file=<F>] [--period=<P>] [--silent] [--time=<T>] [--help]
   vaccine -h | --help
 
 Options:
   -b --bay          Greater SF Bay Area; else only Santa Clara County
-  -d --debug=<D>    Bitfield: 1 for cities w/ stock  [default: 0]
+  -d --debug=<D>    Bitfield: 1 test cities likely w/ stock  [default: 0]
+  -f --file=<F>     File name to save available locations [default: available.txt]
   -h --help         Show this help screen.
   -p --period=<P>   Seconds between scrapes [default: 60]
+  -s --silent       Don't mmake noise
   -t --time=<T>     Hours to loop [default: 3]
   """
 
@@ -79,12 +86,12 @@ Options:
 if __name__ == '__main__':
     CLI_OPTS = docopt(USAGE_STR)
     if CLI_OPTS['--bay']:                   # command line argument
-        CITIES = cities.cities_near     # cities within a 2 hour drive of San Jose, CA
+        CITIES = cities.cities_near         # cities within about a 2 hour drive of San Jose, CA
     else:
-        CITIES = cities.cities_scc      # cities in Santa Cara County
+        CITIES = cities.cities_scc          # cities in Santa Cara County
 
-    if int(CLI_OPTS['--debug']) & 1:        # add a couple of cities that probably have stock
-        CITIES += ['BAKERSFIELD', 'FRESNO',]
+    if int(CLI_OPTS['--debug']) & 1:           # command line argument
+        CITIES += ['BAKERSFIELD', 'FRESNO',]   # add a couple of cities that probably have stock
     MY_CITY_STR = ', '.join('%s%14s'%('' if i%6 != 0 else '\n', x) for i, x in enumerate(CITIES))
     print('\n',
           time.ctime(),
