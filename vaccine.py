@@ -57,29 +57,32 @@ def find_cvs_vaccine(opts, city_lst):
 
     state = 'CA' ###Update with your state abbreviation. Be sure to use all CAPS, e.g. RI
 
-    response = requests.get(
-        "https://www.cvs.com/immunizations/covid-19-vaccine.vaccine-status.{}.json?vaccineinfo".format(state.lower()),
-        headers={"Referer":"https://www.cvs.com/immunizations/covid-19-vaccine"})
-    payload = response.json()
+    try:
+        response = requests.get(
+            "https://www.cvs.com/immunizations/covid-19-vaccine.vaccine-status.{}.json?vaccineinfo".format(state.lower()),
+            headers={"Referer":"https://www.cvs.com/immunizations/covid-19-vaccine"})
+        payload = response.json()
 
-    mappings = {}
-    for item in payload["responsePayloadData"]["data"][state]:
-        mappings[item.get('city')] = item.get('status')
+        mappings = {}
+        for item in payload["responsePayloadData"]["data"][state]:
+            mappings[item.get('city')] = item.get('status')
 
-    got_lst = []
-    ct_str = time.ctime()
-    for key in mappings:
-        if (key in city_lst) and (mappings[key] != 'Fully Booked'):
-            got_lst += [f'{ct_str} - {key:{city_str_len}s} - {mappings[key]}']
-    if got_lst:
-        print('\n'.join(got_lst))
-        with open(opts['--file'], 'a') as f_out:
-            f_out.write('\n'.join(got_lst))
-            f_out.write('\n')
-        if not opts['--silent']:
-            beep(sound='success')
-    else:
-        print('.', end='', flush=True)
+        got_lst = []
+        ct_str = time.ctime()
+        for key in mappings:
+            if (key in city_lst) and (mappings[key] != 'Fully Booked'):
+                got_lst += [f'{ct_str} - {key:{city_str_len}s} - {mappings[key]}']
+        if got_lst:
+            print('\n', '\n'.join(got_lst), end='', flush=True)
+            with open(opts['--file'], 'a') as f_out:
+                f_out.write('\n'.join(got_lst))
+                f_out.write('\n')
+            if not opts['--silent']:
+                beep(sound='success')
+        else:
+            print('.', end='', flush=True)
+    except TimeoutError:
+        print('*', end='', flush=True)
 
 
 
@@ -98,6 +101,8 @@ Options:
   -t --time=<T>     Hours to loop [default: 3]
   """
 
+def tm_str(s):
+    hours = s
 
 if __name__ == '__main__':
     CLI_OPTS = docopt(USAGE_STR)
@@ -109,9 +114,10 @@ if __name__ == '__main__':
     if int(CLI_OPTS['--debug']) & 1:           # command line argument
         CITIES += ['BAKERSFIELD', 'FRESNO',]   # add a couple of cities that probably have stock
     MY_CITY_STR = ', '.join('%s%14s'%('' if i%6 != 0 else '\n', x) for i, x in enumerate(CITIES))
+    PERIOD_STR = time.strftime("%H:%M:%S", time.gmtime(int(CLI_OPTS["--period"])))
     print('\n',
           time.ctime(),
-          f'checking every {CLI_OPTS["--period"]} seconds for {CLI_OPTS["--time"]} hours',
+          f'checking every {PERIOD_STR} for {CLI_OPTS["--time"]} hours',
           MY_CITY_STR)
 
     # loop every --period seconds for --time hours
