@@ -28,7 +28,7 @@ import cities
 
 
 def check_scc(opts):
-    """see if the Santa Clara County site is mmaking appointments
+    """see if the Santa Clara County site is making appointments
     """
     response = requests.get(
         'https://vax.sccgov.org/',
@@ -42,7 +42,7 @@ def check_scc(opts):
                 f_out.write(f'{ct_str} {landing}\n')
             if not opts['--silent']:
                 beep(sound='success')
-    # if links missing eaither canonical or url,
+    # if links missing, either canonical or url,
     except IndexError:
         print('\n', ct_str, 'missing canonical url links:', response.links)
         beep(sound='error')
