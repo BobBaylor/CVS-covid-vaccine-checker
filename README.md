@@ -48,3 +48,11 @@ Contributions are what make the open source community such an amazing place to b
 [license-url]: https://github.com/burgamacha/CVS-vaccine-checker/blob/master/LICENSE.txt
 [blog-shield]: https://img.shields.io/badge/medium-Read%20about%20this%20on%20Medium-lightgrey.svg?style=for-the-badge
 [blog-url]: https://python.plainenglish.io/how-i-built-a-cvs-vaccine-appointment-availability-checker-in-python-6beb379549e4
+
+## My Experience
+
+I added a check of the local county portal and ran this script for a few hours over several days before my tier became eligible just to collect some stats. CVS was releasing appointment slots mostly between 2 and 4 AM and I saw none at the county portal. So when my turn did arrive (50+, no comorbidities), I started the script and went to bed. It woke me early in the morning and even though CVS said "available", I was unable to secure an appointment. After several tries, at multiple locations, I gave up and went back to bed. The next day, the script announced success at my local county portal and, unlike the CVS false positives, I got an appointment on the first try. Within the next few minutes, my wife and at least two co-workers also succeeded by going to the county.
+
+YMMV but adding my county portal did the trick for me. 
+
+HTH, Bob
