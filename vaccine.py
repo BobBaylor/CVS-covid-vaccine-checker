@@ -101,8 +101,6 @@ Options:
   -t --time=<T>     Hours to loop [default: 3]
   """
 
-def tm_str(s):
-    hours = s
 
 if __name__ == '__main__':
     CLI_OPTS = docopt(USAGE_STR)
